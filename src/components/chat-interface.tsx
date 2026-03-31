@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, RotateCcw } from "lucide-react";
 import { PromptStarters } from "./prompt-starters";
 import { cn } from "@/lib/utils";
 
 export function ChatInterface() {
-  const { messages, sendMessage, status, error } = useChat();
+  const { messages, sendMessage, setMessages, status, error } = useChat();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -52,9 +52,21 @@ export function ChatInterface() {
 
       {hasMessages && (
         <div
-          className="mb-4 flex-1 space-y-4 overflow-y-auto rounded-2xl border border-border bg-card/40 p-4 backdrop-blur-sm"
+          className="mb-4 flex-1 overflow-y-auto rounded-2xl border border-border bg-card/40 p-4 backdrop-blur-sm"
           style={{ maxHeight: "50vh" }}
         >
+          <div className="mb-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setMessages([])}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-30"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Clear chat
+            </button>
+          </div>
+          <div className="space-y-4">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
               <motion.div
@@ -121,6 +133,7 @@ export function ChatInterface() {
           )}
 
           <div ref={messagesEndRef} />
+          </div>
         </div>
       )}
 
