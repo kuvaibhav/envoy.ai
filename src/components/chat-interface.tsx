@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User } from "lucide-react";
@@ -8,24 +8,27 @@ import { PromptStarters } from "./prompt-starters";
 import { cn } from "@/lib/utils";
 
 export function ChatInterface() {
-  const { messages, input, handleInputChange, handleSubmit, setInput, append, isLoading } =
-    useChat();
+  const { messages, sendMessage, status, error } = useChat();
+  const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const isLoading = status === "streaming" || status === "submitted";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handlePromptSelect = (prompt: string) => {
-    append({ role: "user", content: prompt });
+  const handleSend = (text?: string) => {
+    const messageText = text || input.trim();
+    if (!messageText || isLoading) return;
+    setInput("");
+    sendMessage({ content: messageText, role: "user" });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (input.trim() && !isLoading) {
-        handleSubmit(e as unknown as React.FormEvent);
-      }
+      handleSend();
     }
   };
 
@@ -43,7 +46,7 @@ export function ChatInterface() {
           <p className="mb-4 text-center text-sm text-muted-foreground">
             Try asking me something:
           </p>
-          <PromptStarters onSelect={handlePromptSelect} />
+          <PromptStarters onSelect={(prompt) => handleSend(prompt)} />
         </motion.div>
       )}
 
@@ -77,7 +80,11 @@ export function ChatInterface() {
                       : "bg-accent text-accent-foreground"
                   )}
                 >
-                  {message.content}
+                  {message.parts
+                    ?.filter((part) => part.type === "text")
+                    .map((part, i) => (
+                      <span key={i}>{part.text}</span>
+                    )) ?? message.content}
                 </div>
                 {message.role === "user" && (
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -107,22 +114,29 @@ export function ChatInterface() {
               </motion.div>
             )}
 
+          {error && (
+            <div className="rounded-xl bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
+              Something went wrong. Please try again.
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="relative">
+      <div className="relative">
         <div className="flex items-end gap-2 rounded-2xl border border-border bg-card/60 p-2 backdrop-blur-sm transition-colors focus-within:border-primary/50">
           <textarea
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything about Kumar..."
             rows={1}
             className="max-h-32 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground/60"
           />
           <button
-            type="submit"
+            type="button"
+            onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-30 disabled:hover:bg-primary"
           >
@@ -132,7 +146,7 @@ export function ChatInterface() {
         <p className="mt-2 text-center text-xs text-muted-foreground/50">
           Powered by envoy.ai — Kumar&apos;s digital representative
         </p>
-      </form>
+      </div>
     </section>
   );
 }
