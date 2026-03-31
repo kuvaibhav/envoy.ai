@@ -22,7 +22,7 @@ export function ChatInterface() {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
     setInput("");
-    sendMessage({ content: messageText, role: "user" });
+    sendMessage({ text: messageText });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
