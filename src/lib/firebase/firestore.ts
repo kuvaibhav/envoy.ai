@@ -12,6 +12,9 @@ import {
 } from "firebase/firestore";
 import { db } from "./config";
 
+// TODO: User IDs are currently human-readable slugs (e.g. "kumar-vaibhav").
+// This works for a small user base but will cause conflicts at scale.
+// Phase 4 should switch to Firebase Auth UIDs as the canonical user ID.
 const DEFAULT_USER_ID = "kumar-vaibhav";
 
 // --- Profile ---
