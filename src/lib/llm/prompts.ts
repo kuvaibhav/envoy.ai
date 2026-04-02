@@ -1,107 +1,30 @@
-export const RESUME_CONTEXT = `
-Kumar Vaibhav
-Location: 17645 NE 69th CT, Redmond, WA 98052
-Phone: +1 (949) 419-5633
-Email: kumar.vaibhav002@gmail.com
-LinkedIn: kumarvaibhav002
+import { assembleLLMContext } from "@/lib/firebase/firestore";
 
-SUMMARY
-- 7+ years of experience building scalable systems, distributed services, APIs, and data platforms.
-- Led cross-tech projects from schema design to observability, automation, and clean abstractions and architectural patterns.
-- Strong focus on clean architecture, developer velocity, and production-grade system reliability.
+export function buildSystemPrompt(context: string): string {
+  return `You are envoy.ai — a digital representative and professional envoy for the person described below.
 
-WORK EXPERIENCE
-
-Salesforce, Inc — Bellevue, Washington
-SOFTWARE ENGINEER (Feb 2022 – Present)
-
-Project: Agentforce – AI-Driven Setup for Data Cloud Enrichments (Target: May 2026)
-- Leading development of an Agentforce-powered setup agent for Related List and Copy Field Enrichments in Salesforce Data Cloud.
-- Enabling the agent to interpret business intent and generate production-grade enrichment configurations across CRM and Unified DMOs.
-- Designing identity-safe mappings using match rules and key qualifiers to ensure accurate customer-level relationships.
-- Building the orchestration layer that converts natural-language requests into valid enrichment definitions.
-- Expected to reduce misconfiguration and customer support incidents by 30–40% while accelerating customer onboarding.
-
-Project: High Scale Objects – Unified Marketing Application (Winter 2025 GA)
-- Led design and implementation of high throughput DML operations for Salesforce High Scale Database (HSDB).
-- Enabled batch CRUD of 3M+ records with sub-100 ms median latency following OData 4.0 protocol.
-- Drove cross functional error-contract overhaul — partnered with platform architects and HSDB team to catalogue failure scenarios into platform-level, standardized client-agnostic API codes thereby reducing "unknown failure" stats by 90%.
-- Extended MockODataService backed on in-house SocketTumi to simulate full OData CRUD + $batch flows, raising test coverage to 95% and retiring brittle wire-format stubs.
-- Led UMA-HSO observability: defined cross-layer logging/metrics (connectivity, query, DML), delivered gap analysis, flow diagrams, and a unified latency & success/fail taxonomy driving Winter GA.
-- Containerized the HSDBR runtime into a Docker image to simplify local development for High Scale Runtime (owned by another team); eliminated complex setup steps and drove adoption across multiple teams.
-
-Project: Data Cloud Enrichments – Copy Field Enrichment (Spring 2024 GA)
-- Designed REST-style Copy-Field APIs (CRUD + activate / deactivate) that power both UI and internal integrations.
-- Designed and built Lightning UI flows for both Copy Field Enrichment and Related List creation, delivering a seamless wizard-style interface now used weekly by hundreds of admins.
-- Extended Copy-Field to support Accelerated DMOs (BYOL cache tables); unlocking a new data-lake use case.
-- Implemented nightly multi-org CopyFieldScanner cron job to auto-disable enrichments when target objects/fields become inaccessible, reducing support cases per release.
-- Built a UI mocking framework using IndexedDB to simulate design-time data for Copy Field and Related List flows, enabling fast local development without backend dependencies.
-- Shipped Fully Qualified Key (FQK) support in Companion orgs via metadata migration and validation utilities — boosting Copy-Field adoption by 20%.
-- Added sandbox-provisioning checks that surface mis-configured orgs up-front, reducing customer investigation cycles by 30%.
-
-Project: Virtual Entity Framework (Internal Platform Feature)
-- Innovated a goldfile based metadata upgrade validation for Near Core entities, avoiding 50% of upgrade issues pre-merge.
-- Instrumented the Virtual Data Adapter with Argus (latency / error-rate), reducing on-call tickets by 25%.
-- Enhanced the Data Api layer and added cache for data source connection requests.
-- Prioritized security in service design; implemented PII redaction/tokenization in logs to align with data compliance and audit requirements.
-
-Plauzzable, Inc — Seattle, Washington
-TECHNOLOGY CONSULTANT (May 2022 – November 2022)
-- Built a POC for webRTC peer-to-peer video/chatting Plauzzable app.
-- Supervised offshore development, designed test plan and led QA for the Plauzzable web application.
-- Worked with product to pitch product at Y Combinator Seattle Startups.
-
-Deloitte Consulting India Pvt. Ltd — Bengaluru, India
-TECHNOLOGY CONSULTANT (May 2017 – September 2020)
-- Led UI development and deployment for a No-Code CRUD Application Generator; designed an Angular-based interface and deployed the app using AWS EC2, enabling seamless full-stack demos without complex local setup.
-- Rectified and redesigned automated command runs, health and alarm checks on Cisco and Nokia routers for a bespoke network automation platform for a Tier 2 Telecom Service Provider thereby improving accuracy of tests by 20%.
-- Designed a common transaction table to log activities of router devices across applications on a network automation platform which improved root cause analysis.
-- Implemented a queuing logic for router allocation for incoming requests thereby optimizing the router utilization by 30%.
-
-EDUCATION
-
-University of California – Irvine, Irvine, California
-MASTER IN COMPUTER SCIENCE, GPA: 4.00 (September 2020 – Dec 2021)
-
-SRM Institute of Science & Technology, Chennai, India
-B.TECH IN ELECTRONICS AND COMMUNICATION (August 2012 – May 2016)
-
-SKILLS
-Programming: Java, Python, JavaScript, C++/C, SQL, HTML5, CSS3
-Libraries & Frameworks: Angular, Lightning UI, Grafana, Bazel, Spring, Docker, RabbitMQ, Bootstrap, Django, NoSQL, JUnit, OAuth 2.0, PyTorch
-Others: Argus (Similar to Prometheus), MongoDB, Git, Unix, Cursor, ChatGPT, Google NotebookLM, CI/CD, Kafka, Jenkins, Jira
-
-PROJECTS & AWARDS
-
-Salesforce Marketing Cloud – Perf Monitoring (Intern, September 2021)
-- Designed a generic database schema on PostgreSQL for storing performance metrics of internal Salesforce applications.
-- Implemented batch processing to optimize publication of 1 million metrics data under 4 minutes from 3 hours.
-- Built a source-agnostic Java-based ingestion pipeline using RabbitMQ to queue and publish tasks asynchronously.
-- Practiced TDD (Test Driven Development) and used JUnit to maintain code coverage of 96%.
-- Integrated the database with Tableau and created a dashboard to visualize performance trends of Salesforce applications.
-
-Butterworth Product Development Competition 2021 Winner
-PROJECT LEAD (May 2021)
-- 3rd Prize winner worth $3500 in the annual Butterworth Product Development Competition 2021 for development and leading of Team Armory towards developing a cybersecurity learning and training platform called "Vital".
-
-Design of Out-of-Order Floating-Point Unit (Author, January 2016)
-- Implemented a fully pipelined single-precision Floating Point Unit on a Spartan 6 FPGA Chip.
-- The investigation shows that the adder and multiplier modules can be clocked at over 300 MHz and the top-module at over 200 MHz. High operating frequencies were achieved by precomputing possible values in earlier pipelining stages.
-`;
-
-export const SYSTEM_PROMPT = `You are envoy.ai — Kumar Vaibhav's digital representative and professional envoy.
-
-Your role is to answer questions about Kumar's professional experience, skills, education, projects, and background. You are conversational, professional, and accurate.
+Your role is to answer questions about their professional experience, skills, education, projects, and background. You are conversational, professional, and accurate.
 
 RULES:
 - Only answer based on the context provided below. Never fabricate or assume details not present in the context.
 - If you don't have enough information to answer a question, say so honestly and suggest what you can help with instead.
-- Speak about Kumar in third person (e.g., "Kumar has..." not "I have...").
+- Speak about the person in third person.
 - Be concise but thorough. Use bullet points and structured formatting when it improves readability.
 - When discussing technical work, highlight impact metrics where available (e.g., "reduced by 30%", "3M+ records").
-- If asked about availability, contact, or hiring, direct them to Kumar's email or LinkedIn.
-- If asked something completely unrelated to Kumar's professional profile, politely redirect the conversation.
+- If asked about availability, contact, or hiring, direct them to the person's email or LinkedIn.
+- If asked something completely unrelated to the person's professional profile, politely redirect the conversation.
 
-KUMAR'S PROFILE:
-${RESUME_CONTEXT}
+PROFILE:
+${context}
 `;
+}
+
+export async function getSystemPrompt(userId?: string): Promise<string> {
+  const context = await assembleLLMContext(userId);
+  if (!context || context.trim().length === 0) {
+    return buildSystemPrompt(
+      "No profile data has been loaded yet. Please ask the site owner to set up their portfolio."
+    );
+  }
+  return buildSystemPrompt(context);
+}

@@ -5,7 +5,7 @@ import {
   createUIMessageStreamResponse,
   type UIMessage,
 } from "ai";
-import { SYSTEM_PROMPT } from "@/lib/llm/prompts";
+import { getSystemPrompt } from "@/lib/llm/prompts";
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -19,11 +19,13 @@ export async function POST(req: Request) {
         .join("") || "",
   }));
 
+  const systemPrompt = await getSystemPrompt();
+
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
       const result = streamText({
         model: google("gemini-2.5-flash-lite"),
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: coreMessages,
       });
 

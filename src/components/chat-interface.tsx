@@ -95,8 +95,8 @@ export function ChatInterface() {
                   {message.parts
                     ?.filter((part) => part.type === "text")
                     .map((part, i) => (
-                      <span key={i}>{part.text}</span>
-                    )) ?? message.content}
+                      <span key={i}>{(part as { type: "text"; text: string }).text}</span>
+                    ))}
                 </div>
                 {message.role === "user" && (
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
