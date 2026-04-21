@@ -28,6 +28,3 @@ yarn-error.log*
 
 # Vercel
 .vercel
-
-# Local scripts (contain personal data, never deploy)
-scripts/
